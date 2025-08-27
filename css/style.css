@@ -1,0 +1,39 @@
+.menubtn {
+    color: #008;
+    width:100px;
+    height:100px;
+}
+button:active{
+    background:#ccc;
+}
+.menus{
+    display: flex;
+    flex-wrap: wrap;
+}
+.autob{
+    background: #dc2;
+    
+}
+.stop{
+    background: #d20;
+    position:absolute;
+    bottom: 0px;
+    right: 0px;
+    z-index:100;
+}
+.submenus {
+    z-index:10;
+    position: absolute;
+    width:100%;
+    left:0;
+    top:0;
+}
+.submenus div {
+    font-size: 18px;
+    border: 1px solid black;
+    background: linear-gradient(#fff, #ddd);
+    padding: 5px;
+}
+.submenus div:active {
+    background:#ccc;
+}

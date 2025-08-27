@@ -1,0 +1,13 @@
+{
+    "short_name": "bootkit",
+    "name": "bootkit",
+    "display": "fullscreen",
+    "start_url": "./index.html",
+    "icons": [
+        {
+            "src": "acepad/192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        }
+    ]
+}
