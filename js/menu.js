@@ -7,7 +7,7 @@ import {mutablePromise} from "./util.js";
 import {networkBoot,insertBootDisk,
 resetall,fullBackup,fixrun,setRmbtn} from "./boot.js";
 import {getMountPromise} from "./fstab.js";
-import { assign } from "./global.js";
+import { assign, getValue } from "./global.js";
 export function rmbtn(){
     for(let b of document.querySelectorAll('button')){
         b.parentNode?.removeChild(b);
@@ -17,16 +17,21 @@ export function rmbtn(){
 setRmbtn(rmbtn);
 export function showMenus(rp){
     if (process.env.SETUP_URL) {
-        btn("Setup/<br/>Restore",()=>networkBoot(process.env.SETUP_URL));
+        btn("Setup/Restore",()=>networkBoot(process.env.SETUP_URL));
     }
-    btn("Insert<br/>Boot Disk",()=>insertBootDisk());
-    btn("Factory<br/>Reset",()=>resetall());
+    btn("Insert Boot Disk",()=>insertBootDisk());
+    btn("Factory Reset",()=>resetall());
     btn("Full backup",()=>fullBackup());
+    btn("Console",()=>showConsole());
     //console.log("rp",rp.exists());
     if(rp.exists()){
         showMainmenus(rp);
         showSubmenus(rp);
     }
+}
+function showConsole(){
+    const vConsole=getValue("vConsole");
+    if (vConsole) vConsole.show();           
 }
 export function parseMenus(menus){
     for(let k in menus){
@@ -39,7 +44,7 @@ export function parseMenus(menus){
 }
 export function initAutoexec(rp) {
   const pNode=getInstance();
-  const {FS}=pNode;
+  const FS=pNode.getFS();
 
     if (!rp.exists()) return;
     const o=rp.obj();
@@ -57,7 +62,7 @@ export function initAutoexec(rp) {
 }
 export function showMainmenus(rp) {
   const pNode=getInstance();
-  const {FS}=pNode;
+  const FS=pNode.getFS();
 
     const o=rp.obj();
     //console.log("rp.obj",o);
@@ -97,7 +102,7 @@ function qsExists(q) {
 let selectedSubmenu;
 export function showSubmenus(rp) {
   const pNode=getInstance();
-  const {FS}=pNode;
+  const FS=pNode.getFS();
   /** @type {HTMLElement} */
     const submenus=qsExists("div.submenus");
     const o=rp.obj();
@@ -137,9 +142,19 @@ export function hideSubmenus(){
     
 } 
 export function btn(c,a,auto){
-    let b=document.createElement("button");
+    let b=document.createElement("div");
     b.classList.add("menubtn");
-    b.innerHTML=c;
+    //b.innerHTML=c;
+      const icon = document.createElement("div");
+      icon.className = "icon";
+      icon.textContent = false ? "📁" : "📄";
+
+      const label = document.createElement("div");
+      label.className = "label";
+      label.textContent = c;
+      b.appendChild(icon);
+      b.appendChild(label);
+
     const menus=qsExists(".menus");
     menus.append(b);
     const act=async()=>{

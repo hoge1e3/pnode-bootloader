@@ -1,15 +1,47 @@
-.menubtn {
+
+  .menubtn{
+    width: 90px;
+    margin: 5px;
+    text-align: center;
+    cursor: pointer;
+  }
+/*.menubtn {
     color: #008;
     width:100px;
     height:100px;
-}
+}*/
 button:active{
     background:#ccc;
 }
 .menus{
+  display: flex;
+  flex-wrap: wrap;
+  padding: 12px;
+}
+/*.menus{
     display: flex;
     flex-wrap: wrap;
+}*/
+.item {
+  width: 90px;
+  margin: 5px;
+  text-align: center;
+  cursor: pointer;
 }
+.icon {
+  font-size: 48px;
+}
+.label {
+  font-size: 14px;
+  word-break: break-all;
+}
+.item.selected {
+  background: #cce5ff;
+  border: 2px solid #339af0;
+  border-radius: 6px;
+}
+  
+
 .autob{
     background: #dc2;
     

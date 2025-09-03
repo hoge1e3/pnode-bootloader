@@ -23,14 +23,17 @@ window.addEventListener('error', function(event) {
     }
 }, true);</script>
 <link rel="stylesheet" href="css/style.css"/>
+<link rel="stylesheet" href="css/file-icon.css"/>
 <link rel="manifest" href="./manifest.json"/>
 </head>
 <body>
-  welcome to bootkit!@
-  <div class="menus"></div>
-  <div class="submenus" style="display: none;"></div>
+  <div id="file-icon">
+    welcome to pnode-bootkit!
+    <div class="menus"></div>
+    <div class="submenus" style="display: none;"></div>
+  </div>
   <script type="module">
-globalThis.PNODE_VER="1.4.7";
+globalThis.PNODE_VER="1.4.9";
 const src=`./js/main.js?${globalThis.PNODE_VER}`;
 import(src);
   </script>

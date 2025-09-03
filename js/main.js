@@ -18,15 +18,6 @@ async function onload() {
     if(!localStorage["/"]){
         localStorage["/"]="{}";
     }
-    const pNode=await init({
-        BOOT_DISK_URL:"https://github.com/hoge1e3/acepad-dev/archive/refs/heads/main.zip",
-        PNODE_URL,
-        SETUP_URL:"acepad/setup.zip",
-    });
-    const FS=pNode.FS;
-    const rp=FS.get("/package.json");
-    showMenus(rp);
-    console.log("Prefetching scripts")
     prefetch().then(()=>{
         const VConsole=getValue("VConsole");
         const vConsole=new VConsole();
@@ -34,6 +25,15 @@ async function onload() {
         vConsole.hideSwitch();
         console.log("Scripts prefetched.");
     });
+    const pNode=await init({
+        BOOT_DISK_URL:"https://github.com/hoge1e3/acepad-dev/archive/refs/heads/main.zip",
+        PNODE_URL,
+        SETUP_URL:"acepad/setup.zip",
+    });
+    const FS=pNode.getFS();
+    const rp=FS.get("/package.json");
+    showMenus(rp);
+    console.log("Prefetching scripts");
     await timeout(1);
     console.log("Mounting RAM/IDB");
     await mount();

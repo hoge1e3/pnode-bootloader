@@ -11,13 +11,13 @@ export function getMountPromise() {
 }
 export function readFstab(path="/fstab.json") {
     const pNode=getInstance();
-    const f=pNode.FS.get(path);
+    const f=pNode.file(path);
     if (f.exists()) return f.obj();
     return defaultFSTab;
 }
 export async function mount(path="/fstab.json") {
   const pNode=getInstance();
-  const {FS}=pNode;
+  const FS=pNode.getFS();
     
     const tab=readFstab(path);
     for (let {mountPoint,fsType,options} of tab) {
