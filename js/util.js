@@ -28,3 +28,9 @@ export const mutablePromise=mp;
 export function isPlainObject(o) {
     return o && o.__proto__===Object.prototype;
 }
+export function qsExists(...a) {
+    const [root, q]=a.length>=2?a:[document, a[0]];
+    const r=root.querySelector(q);
+    if (!r) throw new Error(`${q} does not exist`);
+    return r;
+}

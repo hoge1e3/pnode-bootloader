@@ -1,33 +1,56 @@
 //@ts-check
 import { prefetchAuto , getPrefetchedAutoURL,doQuick } from "./prefetcher.js";
-import { timeout } from "./util.js";
+import { qsExists, timeout } from "./util.js";
 import { getInstance } from "./pnode.js";
 import {mutablePromise} from "./util.js";
 
 import {networkBoot,insertBootDisk,
-resetall,fullBackup,fixrun,setRmbtn} from "./boot.js";
+resetall,fullBackup,fixrun,wireUI} from "./boot.js";
 import {getMountPromise} from "./fstab.js";
 import { assign, getValue } from "./global.js";
+
+let modalInited;
+export function showModal(s) {
+  const modal=qsExists(".modal-container");
+  modal.setAttribute("style", s?"":"display: none;");
+  if (!modalInited) {
+    modal.addEventListener("click",(e)=>{
+        if (e.target===modal) {
+            showModal(false);
+        }
+    });
+    modalInited=true;
+  }
+  for (let e of modal.querySelectorAll(".modal-dialog")) {
+        e.setAttribute("style", "display: none;");
+  }
+  if (typeof s==="string") {
+    const d=qsExists(modal, s);
+    d.setAttribute("style","");
+    return d;
+  }
+  return modal;
+}
 export function rmbtn(){
     for(let b of document.querySelectorAll('button')){
         b.parentNode?.removeChild(b);
     }
     doQuick();
 }
-setRmbtn(rmbtn);
+wireUI({rmbtn,showModal});
 export function showMenus(rp){
-    if (process.env.SETUP_URL) {
-        btn("Setup/Restore",()=>networkBoot(process.env.SETUP_URL));
-    }
-    btn("Insert Boot Disk",()=>insertBootDisk());
-    btn("Factory Reset",()=>resetall());
-    btn("Full backup",()=>fullBackup());
-    btn("Console",()=>showConsole());
-    //console.log("rp",rp.exists());
     if(rp.exists()){
         showMainmenus(rp);
         showSubmenus(rp);
     }
+    if (process.env.SETUP_URL) {
+        btn(["🗃","Setup/Restore"],()=>networkBoot(process.env.SETUP_URL));
+    }
+    btn(["💿","Insert Boot Disk"],()=>insertBootDisk());
+    btn(["💣","Factory Reset"],()=>resetall());
+    btn(["📦","Full backup"],()=>fullBackup());
+    btn(["🖥","Console"],()=>showConsole());
+    //console.log("rp",rp.exists());
 }
 function showConsole(){
     const vConsole=getValue("vConsole");
@@ -61,44 +84,45 @@ export function initAutoexec(rp) {
     
 }
 export function showMainmenus(rp) {
-  const pNode=getInstance();
-  const FS=pNode.getFS();
-
     const o=rp.obj();
     //console.log("rp.obj",o);
     if(!o.menus)return;
     const menus=parseMenus(o.menus);
     let hasAuto;
     for(let k in menus){
-        const {main,auto, submenus}=menus[k];
-        if (auto) hasAuto=true;
-        btn(k,async ()=>{
-            await getMountPromise();
-            const mainF=fixrun(FS.get(main));
-            rmbtn();
-            process.env.boot=mainF.path();
-            console.log("start",process.env.boot);
-            await timeout(1);
-            if (auto) {
-                getPrefetchedAutoURL().then((u)=>import(u));
-            } else {
-                selectedSubmenu=null;
-                await pNode.importModule(mainF);
-            }
-        },auto);
+      const v=menus[k];
+        if (v.auto) hasAuto=true;
+        btn(k, ()=>runMenu(k,v),v.auto);
     }
     if (hasAuto) stopBtn();
-    
+}
+export async function runMenu(k,v){
+    try {
+        const sp=showModal(".splash");
+        sp.textContent="Launching "+k;
+        const pNode=getInstance();
+        const FS=pNode.getFS();
+        const {main,auto, submenus}=v;
+        await getMountPromise();
+        const mainF=fixrun(FS.get(main));
+        rmbtn();
+        process.env.boot=mainF.path();
+        console.log("start",process.env.boot);
+        await timeout(1);
+        /*if (auto) {
+            getPrefetchedAutoURL().then((u)=>import(u));
+        } else {*/
+            selectedSubmenu=null;
+            await pNode.importModule(mainF);
+        //}  
+    } finally {
+        showModal(false);
+    }
 }
 export function getSelectedSubmenu() {
     return selectedSubmenu;
 }
 assign({getSelectedSubmenu});
-function qsExists(q) {
-    const r=document.querySelector(q);
-    if (!r) throw new Error(`${q} does not exist`);
-    return r;
-}
 let selectedSubmenu;
 export function showSubmenus(rp) {
   const pNode=getInstance();
@@ -142,18 +166,25 @@ export function hideSubmenus(){
     
 } 
 export function btn(c,a,auto){
+    let icont;
+    if (typeof c==="string") {
+        icont=c[0];
+    } else {
+        icont=c[0];
+        c=c[1];
+    }
     let b=document.createElement("div");
     b.classList.add("menubtn");
     //b.innerHTML=c;
-      const icon = document.createElement("div");
-      icon.className = "icon";
-      icon.textContent = false ? "📁" : "📄";
+    const icon = document.createElement("div");
+    icon.className = "icon";
+    icon.textContent = icont;//false ? "📁" : "📄";
 
-      const label = document.createElement("div");
-      label.className = "label";
-      label.textContent = c;
-      b.appendChild(icon);
-      b.appendChild(label);
+    const label = document.createElement("div");
+    label.className = "label";
+    label.textContent = c;
+    b.appendChild(icon);
+    b.appendChild(label);
 
     const menus=qsExists(".menus");
     menus.append(b);
@@ -181,14 +212,27 @@ export function abortAuto(){
 }
 let stopBtnTimer;
 export function stopBtn(){
-    if(document.querySelector("button.stop"))return ;
-    const b=document.createElement("button");
+    if(document.querySelector(".icon.stop"))return ;
+    const b=document.createElement("div");
     b.classList.add("menubtn");
     b.classList.add("stop");
+    //b.innerHTML=c;
+    const icon = document.createElement("div");
+    icon.className = "icon";
+    icon.textContent = "⛔";
+
+    const label = document.createElement("div");
+    label.className = "label";
+    label.innerHTML = "Stop <BR>auto Boot<BR>2";
+    b.appendChild(icon);
+    b.appendChild(label);
     
-    b.innerHTML="Stop<br>auto start<br>2";
-    document.body.append(b);
+    const menus=qsExists(".menus");
+    menus.append(b);
     const act=async()=>{
+        if(b.parentNode){
+            b.parentNode.removeChild(b);
+        }
         selectedSubmenu=null;
         hideSubmenus();
         abortAuto();
@@ -202,11 +246,11 @@ export function stopBtn(){
         clickAutostartMenu();
     },2000);
     setTimeout(()=>{
-        b.innerHTML="Stop<br>auto start<br>1";
+        label.innerHTML="Stop<br>auto start<br>1";
     },1000);
 }
 export function clickAutostartMenu(){
-    const ab=document.querySelector("button.autob");
+    const ab=document.querySelector(".autob");
     if (ab) {
         ab.dispatchEvent(new Event("click"));
     }

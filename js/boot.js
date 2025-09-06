@@ -1,16 +1,23 @@
 //@ts-check
+import { getGlobal,getValue } from "./global.js";
 import { getInstance } from "./pnode.js";
+import { qsExists } from "./util.js";
 
 let rmbtn=()=>0;
-export function setRmbtn(f) {rmbtn=f;}
+let showModal=(show)=>0;
+export function wireUI(dc){
+  rmbtn=dc.rmbtn;
+  showModal=dc.showModal;
+}
 function status(...a){
     console.log(...a);
 }
 export async function unzipURL(url, dest) {
     status("Fetching: "+url);
     const response = await fetch(url);
-    console.log(response);
+    console.log("Downloading...");
     let blob=await response.blob();
+    console.log("Unpacking");
     return await unzipBlob(blob,dest);
 }
 export async function unzipBlob(blob, dest) {
@@ -37,28 +44,39 @@ export function fixrun(run){
 export async function networkBoot(url){
     const pNode=getInstance();
     const boot=pNode.file(process.env.boot);
+    const c=getValue("vConsole");
+    if (c) c.show();
     await unzipURL(url, boot);
     status("Boot start!");
     rmbtn();
+    if (c) c.hide();
     await pNode.importModule(fixrun(boot));
 }
 export function insertBootDisk() {
     const pNode=getInstance();
-    const cas=document.createElement("input");
-    cas.setAttribute("type","file");
-    document.body.appendChild(cas);
+    showModal(true);/*qsExists(".modal-container");
+    modal.setAttribute("style","");*/
+    const cas=qsExists(".modal-dialog.upload");//createElement("input");
+    cas.setAttribute("style","");
+    //document.body.appendChild(cas);
     if (process.env.BOOT_DISK_URL) {
-        const dl=document.createElement("div");
-        dl.innerHTML=`<a href="${process.env.BOOT_DISK_URL}">Download Sample Boot Disk</a>`;
-        document.body.appendChild(dl);
+        const a=qsExists(cas, "a");
+        //const dl=document.createElement("div");
+        a.innerHTML="Download Sample Boot Disk";
+        a.setAttribute("href",process.env.BOOT_DISK_URL);
+        //document.body.appendChild(dl);
     }
     //const cas=document.querySelector("#casette");
-    cas.addEventListener("input",async function () {
+    const file=qsExists(cas, ".file");
+    file.addEventListener("input",async function () {
         const run=pNode.file(process.env.boot);
         const file=this.files && this.files[0];
         if (!file) throw new Error("File is not selected.");
+        getGlobal().vConsole?.show();
         await unzipBlob(file,run);
+        getGlobal().vConsole?.hide();
         rmbtn();
+        showModal(false);
         pNode.importModule(fixrun(run));
     });
 }

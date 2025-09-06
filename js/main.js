@@ -26,9 +26,9 @@ async function onload() {
         console.log("Scripts prefetched.");
     });
     const pNode=await init({
-        BOOT_DISK_URL:"https://github.com/hoge1e3/acepad-dev/archive/refs/heads/main.zip",
+        BOOT_DISK_URL:"https://acepad.tonyu.jp/download.php",
         PNODE_URL,
-        SETUP_URL:"acepad/setup.zip",
+        SETUP_URL:"https://acepad.tonyu.jp/download.php",
     });
     const FS=pNode.getFS();
     const rp=FS.get("/package.json");
