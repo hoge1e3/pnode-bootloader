@@ -29,6 +29,8 @@ async function onload() {
         BOOT_DISK_URL:"https://acepad.tonyu.jp/download.php",
         PNODE_URL,
         SETUP_URL:"https://acepad.tonyu.jp/download.php",
+        INSTALL_DIR:"/idb/run",
+        RESCUE_DIR:"/tmp/run",
     });
     const FS=pNode.getFS();
     const rp=FS.get("/package.json");

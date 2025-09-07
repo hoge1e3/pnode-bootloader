@@ -44,7 +44,7 @@ export function showMenus(rp){
         showSubmenus(rp);
     }
     if (process.env.SETUP_URL) {
-        btn(["🗃","Setup/Restore"],()=>networkBoot(process.env.SETUP_URL));
+        btn(["🗃","Install/Rescue"],()=>networkBoot(process.env.SETUP_URL));
     }
     btn(["💿","Insert Boot Disk"],()=>insertBootDisk());
     btn(["💣","Factory Reset"],()=>resetall());

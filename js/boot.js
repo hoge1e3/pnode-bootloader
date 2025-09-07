@@ -1,7 +1,8 @@
 //@ts-check
 import { getGlobal,getValue } from "./global.js";
 import { getInstance } from "./pnode.js";
-import { qsExists } from "./util.js";
+import { qsExists, timeout } from "./util.js";
+import { getMountPromise } from "./fstab.js";
 
 let rmbtn=()=>0;
 let showModal=(show)=>0;
@@ -43,13 +44,23 @@ export function fixrun(run){
     return run;
 }
 export async function networkBoot(url){
+    await getMountPromise();
     const pNode=getInstance();
-    const boot=pNode.file(process.env.boot);
+    let boot=pNode.file(process.env.INSTALL_DIR);
+    let rescue=false;
+    if (boot.exists()) {
+        if (!confirm(`Found installation in '${process.env.INSTALL_DIR}'. Boot with Rescue mode in '${process.env.RESCUE_DIR}'.`)) return;
+        boot=pNode.file(process.env.RESCUE_DIR);
+        rescue=true;
+    }
+    process.env.boot=boot;
+    process.env.installation=rescue?"rescue":"install";
     const c=getValue("vConsole");
     if (c) c.show();
     await unzipURL(url, boot);
     status("Boot start!");
     rmbtn();
+    await timeout(1);
     if (c) c.hide();
     await pNode.importModule(fixrun(boot));
 }

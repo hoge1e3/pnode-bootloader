@@ -17,7 +17,7 @@ export async function init(env={}){
     await pNode.boot();// 'process' is enabled here 
     Object.assign(process.env, env);
     process.env.PNODE_VER=pNode.version;
-    process.env.boot=process.env.TMP_BOOT||"/tmp/boot/";
+    //process.env.boot=process.env.TMP_BOOT||"/tmp/boot/";
     pollute({pNode, FS:pNode.FS});
     return pNode;
 }
