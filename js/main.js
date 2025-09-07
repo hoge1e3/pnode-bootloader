@@ -35,9 +35,10 @@ async function onload() {
     showMenus(rp);
     console.log("Prefetching scripts");
     await timeout(1);
+    const ti=performance.now();
     console.log("Mounting RAM/IDB");
     await mount();
-    console.log("Mounted.");
+    console.log("Mounted. ",performance.now()-ti,"msec taken.");
     initAutoexec(rp);
 }
 

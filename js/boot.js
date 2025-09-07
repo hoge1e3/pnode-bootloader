@@ -31,6 +31,7 @@ export async function unzipBlob(blob, dest) {
 }
 export function fixrun(run){
     try{
+        if(run.isDir())return run;
         const ls=run.ls();
         if(!ls.includes("package.json")&&
         ls.length==1){

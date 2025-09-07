@@ -96,24 +96,32 @@ export function showMainmenus(rp) {
     }
     if (hasAuto) stopBtn();
 }
+async function splash(mesg,sp){
+  sp.textContent=mesg;
+  await timeout(1);    
+}
 export async function runMenu(k,v){
     try {
         const sp=showModal(".splash");
-        sp.textContent="Launching "+k;
+        await splash("Launching "+k,sp);
         const pNode=getInstance();
         const FS=pNode.getFS();
         const {main,auto, submenus}=v;
-        await getMountPromise();
-        const mainF=fixrun(FS.get(main));
         rmbtn();
+        await splash("Waiting for disk ready",sp);
+        await getMountPromise();
+        await splash("disk ready",sp);
+        const mainF=fixrun(FS.get(main));
         process.env.boot=mainF.path();
-        console.log("start",process.env.boot);
-        await timeout(1);
+        await splash("start "+process.env.boot,sp);
+        //
         /*if (auto) {
             getPrefetchedAutoURL().then((u)=>import(u));
         } else {*/
             selectedSubmenu=null;
             await pNode.importModule(mainF);
+        await splash("impored "+mainF,sp);
+        
         //}  
     } finally {
         showModal(false);
