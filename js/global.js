@@ -31,9 +31,11 @@ export function assignDefault(o, dst=pNodeBootLoader) {
     }
 }
 assignDefault({
+    version:"1.0.0",
     getValue,
     assign, 
     assignDefault,
     pollute,
     env:{},
+    readyPromsise:{},
 });

@@ -2,7 +2,7 @@
 import { prefetchAuto , getPrefetchedAutoURL,doQuick } from "./prefetcher.js";
 import { qsExists, timeout } from "./util.js";
 import { getInstance } from "./pnode.js";
-import {mutablePromise} from "./util.js";
+import {mutablePromise,can} from "./util.js";
 
 import {networkBoot,insertBootDisk,
 resetall,fullBackup,fixrun,wireUI} from "./boot.js";
@@ -92,11 +92,16 @@ export function showMainmenus(rp) {
     for(let k in menus){
       const v=menus[k];
         if (v.auto) hasAuto=true;
-        btn(k, ()=>runMenu(k,v),v.auto);
+        /**@type string|string[] */
+        let c=k;
+        if(v.icontext){
+          c=[v.icontext,k];
+        }
+        btn(c, ()=>runMenu(k,v),v.auto);
     }
     if (hasAuto) stopBtn();
 }
-async function splash(mesg,sp){
+export async function splash(mesg,sp){
   sp.textContent=mesg;
   await timeout(1);    
 }
@@ -119,9 +124,12 @@ export async function runMenu(k,v){
             getPrefetchedAutoURL().then((u)=>import(u));
         } else {*/
             selectedSubmenu=null;
-            await pNode.importModule(mainF);
+        const mod=await pNode.importModule(mainF);
         await splash("impored "+mainF,sp);
-        
+        if(v.call){
+          const [n,...a]=v.call;
+          mod[n](...a);
+        }
         //}  
     } finally {
         showModal(false);

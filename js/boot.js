@@ -1,7 +1,7 @@
 //@ts-check
 import { getGlobal,getValue } from "./global.js";
 import { getInstance } from "./pnode.js";
-import { qsExists, timeout } from "./util.js";
+import { qsExists, timeout,can } from "./util.js";
 import { getMountPromise } from "./fstab.js";
 
 let rmbtn=()=>0;
@@ -62,7 +62,8 @@ export async function networkBoot(url){
     rmbtn();
     await timeout(1);
     if (c) c.hide();
-    await pNode.importModule(fixrun(boot));
+    const mod=await pNode.importModule(fixrun(boot));
+    if(can(mod,"install"))mod.install();
 }
 export function insertBootDisk() {
     const pNode=getInstance();

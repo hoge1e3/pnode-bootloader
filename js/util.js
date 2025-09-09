@@ -13,7 +13,9 @@ export function onReady(callback) {
     if (document.readyState==="complete") callback();
     else addEventListener("load",callback);
 }
-
+export function can(o,n){
+  return n in o && typeof o[n]==="function" && o[n];
+}
 export const timeout=(t)=>new Promise(s=>setTimeout(s,t));
 function mp(){
     const t=()=>{
