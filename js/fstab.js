@@ -18,12 +18,16 @@ export function readFstab(path="/fstab.json") {
     return defaultFSTab;
 }
 export async function mount(path="/fstab.json") {
-  const pNode=getInstance();
-  const FS=pNode.getFS();
+    const pNode=getInstance();
+    const FS=pNode.getFS();
     
     const tab=readFstab(path);
     for (let {mountPoint,fsType,options} of tab) {
         await FS.mountAsync(mountPoint,fsType,options);
+    }
+    if (location.href.match(/localhost/)){ 
+        const ws=await import("./ws-client.js");
+        await ws.init(FS.get("/idb/"));
     }
     mountPromise.resolve();
 }
