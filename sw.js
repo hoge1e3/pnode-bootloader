@@ -1,5 +1,5 @@
 const NAME = 'acepad-os';
-const VERSION = '024';
+const VERSION = '025';
 const CACHE_NAME = NAME + VERSION;
 const urlsToCache = [
     //"./test.js",
@@ -16,7 +16,7 @@ self.addEventListener('install',
 (event)=>event.waitUntil(installEvent(event)));
 //const fs={};
 self.addEventListener("message",(event)=>{
-    console.log("mesg",event, CACHE_NAME);
+    //console.log("mesg",event, CACHE_NAME);
     //const data=event.data;
     // data={url: body: headers: }
     //fs[data.url]=data;
@@ -26,7 +26,7 @@ self.addEventListener("message",(event)=>{
 });
 function useCacheOnlyIfOffline({url}) {
     if (!self.registration.scope) return true;
-    console.log("useCacheOnlyIfOffline", url, self.registration.scope, url.startsWith(self.registration.scope), url.includes("/tmp-gen/"));
+    //console.log("useCacheOnlyIfOffline", url, self.registration.scope, url.startsWith(self.registration.scope), url.includes("/tmp-gen/"));
     if (url.includes("?")) return true;
     if (url.match(/\blatest\b/)) return true;
     if (!url.startsWith(self.registration.scope)) return false;
@@ -36,7 +36,7 @@ const doNotRetryOpaque=new Set();
 // リクエストされたファイルが Service Worker にキャッシュされている場合
 // キャッシュからレスポンスを返す
 self.addEventListener('fetch', (event)=>{
-    console.log("fetch",event, event.request.url, CACHE_NAME);
+    //console.log("fetch",event, event.request.url, CACHE_NAME);
     /*if (event.request.cache === 'only-if-cached' && event.request.mode !== 'same-origin'){
         return;
     }*/

@@ -9,7 +9,9 @@ resetall,fullBackup,fixrun,wireUI} from "./boot.js";
 import {getMountPromise} from "./fstab.js";
 import { assign, getValue } from "./global.js";
 
+/**@type boolean */
 let modalInited;
+/**@type ShowModal */
 export function showModal(s) {
   const modal=qsExists(".modal-container");
   modal.setAttribute("style", s?"":"display: none;");
@@ -38,24 +40,27 @@ export function rmbtn(){
     doQuick();
 }
 wireUI({rmbtn,showModal,splash});
+/** @type (rp:SFile)=>void */
 export function showMenus(rp){
     if(rp.exists()){
         showMainmenus(rp);
         showSubmenus(rp);
     }
-    if (process.env.SETUP_URL) {
-        btn(["🗃","Install/Rescue"],()=>networkBoot(process.env.SETUP_URL));
+    const su=process.env.SETUP_URL;
+    if (su) {
+        btn(["💾","Install/Rescue"],()=>networkBoot(su));
     }
     btn(["💿","Insert Boot Disk"],()=>insertBootDisk());
     btn(["💣","Factory Reset"],()=>resetall());
     btn(["📦","Full backup"],()=>fullBackup());
-    btn(["🖥","Console"],()=>showConsole());
+    btn(["💻","Console"],()=>showConsole());
     //console.log("rp",rp.exists());
 }
 function showConsole(){
     const vConsole=getValue("vConsole");
     if (vConsole) vConsole.show();           
 }
+/**@param {Menus} menus */
 export function parseMenus(menus){
     for(let k in menus){
         const main=menus[k];
@@ -65,11 +70,13 @@ export function parseMenus(menus){
     }
     return menus;
 }
+/**@param {SFile} rp */
 export function initAutoexec(rp) {
   const pNode=getInstance();
   const FS=pNode.getFS();
 
     if (!rp.exists()) return;
+    /**@type {RootPackageJSON}*/
     const o=rp.obj();
     //console.log("rp.obj",o);
     if(!o.menus) return;
@@ -91,6 +98,7 @@ export function initAutoexec(rp) {
         }
     }
 }
+/** @param {SFile} rp */
 export function showMainmenus(rp) {
     const o=rp.obj();
     //console.log("rp.obj",o);
@@ -109,10 +117,18 @@ export function showMainmenus(rp) {
     }
     if (hasAuto) stopBtn();
 }
+/**
+ * @param {string} mesg 
+ * @param {HTMLElement} sp 
+*/
 export async function splash(mesg,sp){
   sp.textContent=mesg;
   await timeout(1);    
 }
+/**
+ * @param {string} k 
+ * @param {Menu} v 
+*/
 export async function runMenu(k,v){
     try {
         const sp=showModal(".splash");
@@ -147,7 +163,9 @@ export function getSelectedSubmenu() {
     return selectedSubmenu;
 }
 assign({getSelectedSubmenu});
+/**@type Promise<string> */
 let selectedSubmenu;
+/**@type (rp:SFile)=>void */
 export function showSubmenus(rp) {
   const pNode=getInstance();
   const FS=pNode.getFS();

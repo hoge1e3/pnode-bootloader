@@ -1,20 +1,25 @@
 //@ts-check
 import { getGlobal,getValue } from "./global.js";
 import { getInstance } from "./pnode.js";
-import { qsExists, timeout,can } from "./util.js";
+import { qsExists, timeout,can, deleteAllTablesInDatabase } from "./util.js";
 import { getMountPromise,readFstab } from "./fstab.js";
 
-let rmbtn=()=>0;
-let showModal=(show)=>0;
-let splash=(mesg, dom)=>0;
+let rmbtn=()=>{};
+/**@type ShowModal */
+let showModal=(show)=>document.body;
+/**@type Splash */
+let splash=(mesg, dom)=>{};
+/**@type (dc:WireUIDC)=>void*/
 export function wireUI(dc){
   rmbtn=dc.rmbtn;
   showModal=dc.showModal;
   splash=dc.splash;
 }
+/**@type (...a:any[])=>void */
 function status(...a){
     console.log(...a);
 }
+/**@type (url:string, dest:SFile)=>Promise<void> */
 export async function unzipURL(url, dest) {
     status("Fetching: "+url);
     const response = await fetch(url);
@@ -23,6 +28,7 @@ export async function unzipURL(url, dest) {
     console.log("Unpacking");
     return await unzipBlob(blob,dest);
 }
+/**@type (blob:Blob, dest:SFile)=>Promise<void> */
 export async function unzipBlob(blob, dest) {
     const pNode=getInstance();
     const FS=pNode.getFS();
@@ -32,6 +38,7 @@ export async function unzipBlob(blob, dest) {
     dest.mkdir();
     await FS.zip.unzip(zip,dest,{v:1});
 }
+/**@type (run:SFile)=>SFile */
 export function fixrun(run){
     try{
         if(run.isDir())return run;
@@ -45,6 +52,7 @@ export function fixrun(run){
     }
     return run;
 }
+/**@type (url:string)=>Promise<void> */
 export async function networkBoot(url){
     await getMountPromise();
     const pNode=getInstance();
@@ -85,6 +93,7 @@ export function insertBootDisk() {
     const file=qsExists(cas, ".file");
     file.addEventListener("input",async function () {
         const run=pNode.file(process.env.RESCUE_DIR);
+        //@ts-ignore
         const file=this.files && this.files[0];
         if (!file) throw new Error("File is not selected.");
         const c=await getValue("readyPromises").vConsole;
@@ -97,7 +106,7 @@ export function insertBootDisk() {
         if(can(mod,"install")) mod.install();
     });
 }
-export async function resetall(a){
+export async function resetall(){
     if(prompt("type 'really' to clear all data")!=="really")return;
     const sp=showModal(".splash");
     await splash("deleting...",sp);
@@ -106,11 +115,12 @@ export async function resetall(a){
     const FS=pNode.getFS();
     for (let {mountPoint,fsType,options} of tab) {
       if(fsType==="idb"){
-        console.log("DELETING", mountPoint);
+        await deleteAllTablesInDatabase(options.dbName);
+        /*console.log("DELETING", mountPoint);
         for(let f of pNode.file(mountPoint).listFiles()){
           console.log("DELETING", f.path());
           f.rm({r:true});
-        }
+        }*/
       }
     }
     for(let k in localStorage){
@@ -127,9 +137,8 @@ export async function resetall(a){
 export async function fullBackup(){
     const pNode=getInstance();
     const FS=pNode.getFS();
-      const sp=showModal(".splash");
-  await splash("zipping...",sp);
-
+    const sp=showModal(".splash");
+    await splash("zipping...",sp);
     await FS.zip.zip(FS.get("/"));
     showModal();
 }

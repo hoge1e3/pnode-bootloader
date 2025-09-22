@@ -8,16 +8,27 @@ export function init(home) {
     ws.addEventListener("open", () => {
         log("connected");
     });
+    ws.addEventListener("close", () => {
+        alert("Websocket disconnect");
+    });
+    ws.addEventListener("error", (e) => {
+        alert("Websocket Error");
+        console.error(e);
+    });
     ws.addEventListener("message", e => {
         const _data = JSON.parse(e.data);
         if (_data.type === "init") {
-            for (let f of home.listFiles()) f.rm({r:true});
+            let st=performance.now();
+            console.log("Start sync init");
+            /*for (let f of home.listFiles()) f.rm({r:true});
+            console.log("Rm taken "+(performance.now()-st)+"msec");*/
+            st=performance.now();
             //console.log("init", _data);
             for (let {path, info} of _data.files) {
                 writeFile(path, info, true);
             }
             //Object.assign(files, _data.files);
-            log("initialized: " + (_data.files).length + "Files");
+            log("initialized: " + (_data.files).length + "Files. Taken "+(performance.now()-st)+"msec.");
             startWatch();
             mp.resolve();
         } else if (_data.type === "update") {
@@ -36,19 +47,24 @@ export function init(home) {
     function startWatch(){
         home.watch((type, file)=>{
             const path=file.relPath(home);
+            //console.log(type,path, home.path(), file.path());
             if (file.isDir()) return;
             setTimeout(()=>{
-                if (file.exists()) {
-                    ws.send(JSON.stringify({
-                        type: "update",
-                        path,
-                        info: readFile(path),
-                    }));
-                } else {
-                    ws.send(JSON.stringify({
-                        type: "delete",
-                        path
-                    }));
+                try {
+                    if (file.exists()) {
+                        ws.send(JSON.stringify({
+                            type: "update",
+                            path,
+                            info: readFile(path),
+                        }));
+                    } else {
+                        ws.send(JSON.stringify({
+                            type: "delete",
+                            path
+                        }));
+                    }
+                }catch(e) {
+                    alert(e);
                 }
             },100);
         });

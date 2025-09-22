@@ -1,6 +1,6 @@
 //@ts-check
 import { getInstance } from "./pnode.js";
-import {mutablePromise} from "./util.js";
+import {deleteAllTablesInDatabase, mutablePromise} from "./util.js";
 import { assign } from "./global.js";
 let mountPromise=mutablePromise();
 const defaultFSTab=[
@@ -20,14 +20,24 @@ export function readFstab(path="/fstab.json") {
 export async function mount(path="/fstab.json") {
     const pNode=getInstance();
     const FS=pNode.getFS();
-    
+    const useWS=location.href.match(/localhost/);
     const tab=readFstab(path);
+    let wsMountPoint;
+    if (useWS) {
+        for (let {mountPoint,fsType,options} of tab) {
+            if (fsType==="idb" && mountPoint.match(/^\/idb\b/) && !wsMountPoint) {
+                wsMountPoint=mountPoint;
+                console.log("wsMountPoint", wsMountPoint);
+                await deleteAllTablesInDatabase(options.dbName);
+            }
+        }
+    }
     for (let {mountPoint,fsType,options} of tab) {
         await FS.mountAsync(mountPoint,fsType,options);
     }
-    if (location.href.match(/localhost/)){ 
+    if (wsMountPoint){ 
         const ws=await import("./ws-client.js");
-        await ws.init(FS.get("/idb/"));
+        await ws.init(FS.get(wsMountPoint));
     }
     mountPromise.resolve();
 }

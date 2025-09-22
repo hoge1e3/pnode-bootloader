@@ -30,9 +30,50 @@ export const mutablePromise=mp;
 export function isPlainObject(o) {
     return o && o.__proto__===Object.prototype;
 }
+/** @type ((qs:string)=>HTMLElement)|((root:HTMLElement, qs:string)=>HTMLElement) */
+/** @param {any[]} a */
 export function qsExists(...a) {
     const [root, q]=a.length>=2?a:[document, a[0]];
+    //@ts-ignore
+    /** @type {HTMLElement} r */
     const r=root.querySelector(q);
     if (!r) throw new Error(`${q} does not exist`);
     return r;
+}
+
+/** @type (dbName:string)=>Promise<string> */
+export function deleteAllTablesInDatabase(dbName) {
+  return new Promise((resolve, reject) => {
+    // データベースを開く
+    const request = indexedDB.open(dbName);
+    request.onsuccess = (event) => {
+        //@ts-ignore
+      const db = event.target.result;
+      // トランザクションを開始（すべてのオブジェクトストアにアクセスする）
+      const transaction = db.transaction(db.objectStoreNames, 'readwrite');
+      transaction.oncomplete = () => {
+        // トランザクションが成功した場合、データベースを閉じてPromiseを解決
+        db.close();
+        resolve(`All tables in the database "${dbName}" have been deleted.`);
+      };
+    //@ts-ignore
+      transaction.onerror = (event) => {
+        // トランザクション中にエラーが発生した場合、データベースを閉じてPromiseを拒否
+        db.close();
+        reject(`Error deleting tables in the database "${dbName}": ${event.target.error}`);
+      };
+
+      // オブジェクトストアをすべて削除
+      Object.keys(db.objectStoreNames).forEach(i => {
+        console.log("Deleting", db.objectStoreNames[i]);
+        const store = transaction.objectStore(db.objectStoreNames[i]);
+        store.clear();  // 各オブジェクトストアを削除（clear()はストア内の全データを削除）
+      });
+    };
+    request.onerror = (event) => {
+      // データベースのオープンに失敗した場合
+        //@ts-ignore
+      reject(`Failed to open the database "${dbName}": ${event.target.error}`);
+    };
+  });
 }

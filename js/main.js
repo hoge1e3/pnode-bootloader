@@ -32,9 +32,9 @@ async function onload() {
         console.log("Scripts prefetched.");
     });
     const pNode=await init({
-        BOOT_DISK_URL:"https://acepad.tonyu.jp/download.php",
+        BOOT_DISK_URL:`https://acepad.tonyu.jp/download.php?c=${Math.random()}`,
         PNODE_URL,
-        SETUP_URL:"https://acepad.tonyu.jp/download.php",
+        SETUP_URL:`https://acepad.tonyu.jp/download.php?c=${Math.random()}`,
         INSTALL_DIR:"/idb/run",
         RESCUE_DIR:"/tmp/run",
     });
@@ -59,15 +59,22 @@ function initVConsole(){
 }
 function prefetch(){
     const cdn="https://cdn.jsdelivr.net/npm/";//"https://unpkg.com/"
+    /**@param {string|Promise<any>} u */
     const to_p=(u)=>
     typeof u==="string" ? 
     prefetchScript(cdn+u) : u;
+    /**@param {any[]} a*/
     const para=(...a)=>Promise.all(a.map(to_p));
+    /**@param {any[]} a*/
     const seq=async (...a)=>{
         const r=[];
         for (let u of a) r.push(await to_p(u));
         return r;
     };
+    /**
+       @param {string|Promise<any>} p
+       @param {(r:any)=>any} f
+    */
     const post=(p, f)=>to_p(p).then(f);
     return para(
     "jquery@1.12.1/dist/jquery.min.js",
