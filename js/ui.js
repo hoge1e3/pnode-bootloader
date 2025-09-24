@@ -69,13 +69,6 @@ export function btn(c,a/*,auto*/){
         }
     };
     b.addEventListener("click", act);	    
-    /*if(auto){
-        b.classList.add("autob");
-    }*/
-    /*console.log("auto start ",c," in 2 seconds.");
-    autoexec=act;
-    stopBtn();
-    */
 }
 
 /**
@@ -86,12 +79,3 @@ export async function splash(mesg,sp){
   sp.textContent=mesg;
   await timeout(1);    
 }
-/*
-let stopBtnTimer;
-export function abortAuto(){
-    const b=document.querySelector("button.stop");
-    if(b)document.body.removeChild(b);
-    if (stopBtnTimer) console.log("Auto boot aborted.");
-    clearTimeout(stopBtnTimer);
-    stopBtnTimer=null;
-}*/
