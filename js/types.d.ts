@@ -33,6 +33,7 @@ export type PNode={
 };
 export type RootFS={
     hasUncommited():boolean;
+    commitPromise():Promise<void>;
 };
 export type TFS={
     get(path:string):SFile;

@@ -48,20 +48,6 @@ export async function prefetchModule(file) {
     const r=await compiler.compile(e);
     return r;
 }
-let prefetched_auto_url=mutablePromise();
-export function getPrefetchedAutoURL() {
-    return prefetched_auto_url;
-}
-/*export async function prefetchAuto({mainF}) {
-    try {
-        const r=await prefetchModule(mainF);
-        prefetched_auto_url.resolve(r.url);
-        console.log("Prefentched auto start",r.url);
-    }catch(e) {
-        prefetched_auto_url.reject(e);
-        console.error(e);
-    }
-}*/
 /**
  * 
  * @param {string} url 

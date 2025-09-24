@@ -87,10 +87,10 @@ export async function networkBoot(url){
 }
 export function insertBootDisk() {
     const pNode=getInstance();
-    showModal(true);/*qsExists(".modal-container");
+    const cas=showModal(".upload");/*qsExists(".modal-container");
     modal.setAttribute("style","");*/
-    const cas=qsExists(".modal-dialog.upload");//createElement("input");
-    cas.setAttribute("style","");
+    //const cas=qsExists(".modal-dialog.upload");//createElement("input");
+    //cas.setAttribute("style","");
     //document.body.appendChild(cas);
     if (process.env.BOOT_DISK_URL) {
         const a=qsExists(cas, "a");

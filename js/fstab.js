@@ -38,6 +38,7 @@ export async function mount(path="/fstab.json") {
     if (wsMountPoint){ 
         const ws=await import("./ws-client.js");
         await ws.init(FS.get(wsMountPoint));
+        await FS.getRootFS().commitPromise();
     }
     mountPromise.resolve();
 }

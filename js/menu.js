@@ -7,15 +7,13 @@
  * @typedef { import("./types").RootPackageJSON } RootPackageJSON
  */
 
-import { /*prefetchAuto ,*/ prefetchModule, getPrefetchedAutoURL,doQuick } from "./prefetcher.js";
-import { qsExists, timeout } from "./util.js";
+import { /*prefetchAuto ,*/ prefetchModule, doQuick } from "./prefetcher.js";
 import { getInstance } from "./pnode.js";
-import {mutablePromise,can} from "./util.js";
 
 import {networkBoot,insertBootDisk,
 resetall,fullBackup,fixrun,wireUI} from "./boot.js";
 import {getMountPromise} from "./fstab.js";
-import { assign, getValue } from "./global.js";
+import { getValue } from "./global.js";
 import { btn, showModal, splash } from "./ui.js";
 
 export function rmbtn(){
@@ -120,11 +118,6 @@ export async function runMenu(k,v){
         const mainF=fixrun(FS.get(main));
         process.env.boot=mainF.path();
         await splash("start "+process.env.boot,sp);
-        //
-        /*if (auto) {
-            getPrefetchedAutoURL().then((u)=>import(u));
-        } else {*/
-            //selectedSubmenu=null;
         const mod=await pNode.importModule(mainF);
         await splash("impored "+mainF,sp);
         if(v.call){
