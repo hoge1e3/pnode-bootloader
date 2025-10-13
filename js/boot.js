@@ -120,7 +120,7 @@ export async function resetall(){
     for (let fs of rootFS.fstab()) {
         if(fs.fstype()==="IndexedDB") {
             /** @ts-ignore */
-            removeAllFromIDB(fs.storage);
+            removeAllFromIDB(fs.storage, fs.mountPoint);
         }   
     }
     /*for (let {mountPoint,fsType,options} of tab) {

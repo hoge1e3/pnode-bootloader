@@ -1,6 +1,7 @@
 export type SFile={
     exists(): boolean;
     obj(): any;
+    obj(o:object): any;
     mkdir():void;
     isDir():boolean;
     ls():string[];

@@ -22,9 +22,13 @@ export function rmbtn(){
 }
 wireUI({rmbtn,showModal,splash});
 /** @type (rp:SFile)=>void */
-export function showMenus(rp){
-    if(rp.exists()){
-        showMainmenus(rp);
+export function showMenus(rootPkgJson){
+    const pNode=getInstance();
+    const FS=pNode.getFS();
+    
+    
+    if(rootPkgJson.exists()){
+        showMainmenus(rootPkgJson);
         //showSubmenus(rp);
     }
     const su=process.env.SETUP_URL;
@@ -53,7 +57,7 @@ export function parseMenus(menus){
 }
 /**@param {SFile} rp */
 export function scanPrefetchModule(rp) {
-      const pNode=getInstance();
+    const pNode=getInstance();
     const FS=pNode.getFS();
     if (!rp.exists()) return;
     /**@type {RootPackageJSON}*/

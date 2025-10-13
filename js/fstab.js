@@ -3,7 +3,7 @@
  * @typedef { import("./types").MultiSyncIDBStorage } MultiSyncIDBStorage
  */
 import { getInstance } from "./pnode.js";
-import { mutablePromise} from "./util.js";
+import { mutablePromise, directorify} from "./util.js";
 import { assign } from "./global.js";
 let mountPromise=mutablePromise();
 const defaultFSTab=[
@@ -36,7 +36,7 @@ export async function mount(path="/fstab.json") {
                 /** @ts-ignore */
                 const storage=fs.storage;
                 if (storage) {
-                    removeAllFromIDB(storage);
+                    removeAllFromIDB(storage, mountPoint);
                 }
             }
         }
@@ -45,16 +45,32 @@ export async function mount(path="/fstab.json") {
         const ws=await import("./ws-client.js");
         await ws.init(FS.get(wsMountPoint));
         await FS.getRootFS().commitPromise();
+        const rootPkgJson=FS.get("/package.json");
+        if (!rootPkgJson.exists() && process.env.INSTALL_DIR && FS.get(process.env.INSTALL_DIR).exists()) {
+            rootPkgJson.obj({
+                menus: {
+                    run: {
+                        main: process.env.INSTALL_DIR,
+                        call: ["main"],
+                    }
+                }
+            });
+            alert(`Websocket sync dir is available on ${process.env.INSTALL_DIR}. Reload to show launch menu.`);
+        }
     }
     mountPromise.resolve();
 }
 /**
  * @param storage {MultiSyncIDBStorage}
+ * @param mountPoint {string}
  */
-export async function removeAllFromIDB(storage) {
+export async function removeAllFromIDB(storage, mountPoint) {
+    mountPoint=directorify(mountPoint);
     for (let k of storage.keys()) {
         //console.log(k); 
+        if (k==mountPoint) continue;
         storage.removeItem(k);
     }
+    storage.setItem(mountPoint, "{}"); 
     await storage.waitForCommit();
 }

@@ -111,3 +111,12 @@ export function getEnv(n){
   if (!r) throw new Error(`No envvar for ${n}`);
   return r;
 }
+/**
+ * 
+ * @param {string} p 
+ * @retuns string
+ */
+export function directorify(p) {
+  if (!p.endsWith("/")) p+="/";
+  return p;
+}
