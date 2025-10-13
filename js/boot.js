@@ -11,8 +11,8 @@
  */
 import { getValue } from "./global.js";
 import { getInstance } from "./pnode.js";
-import { qsExists, timeout,can, deleteAllTablesInDatabase, getEnv } from "./util.js";
-import { getMountPromise,readFstab } from "./fstab.js";
+import { qsExists, timeout,can, getEnv } from "./util.js";
+import { getMountPromise,readFstab, removeAllFromIDB } from "./fstab.js";
 
 let rmbtn=()=>{};
 /**@type ShowModal */
@@ -116,16 +116,18 @@ export async function resetall(){
     const tab=readFstab();
     const pNode=getInstance();
     const FS=pNode.getFS();
-    for (let {mountPoint,fsType,options} of tab) {
+    const rootFS=FS.getRootFS();
+    for (let fs of rootFS.fstab()) {
+        if(fs.fstype()==="IndexedDB") {
+            /** @ts-ignore */
+            removeAllFromIDB(fs.storage);
+        }   
+    }
+    /*for (let {mountPoint,fsType,options} of tab) {
       if(fsType==="idb"){
         await deleteAllTablesInDatabase(options.dbName);
-        /*console.log("DELETING", mountPoint);
-        for(let f of pNode.file(mountPoint).listFiles()){
-          console.log("DELETING", f.path());
-          f.rm({r:true});
-        }*/
       }
-    }
+    }*/
     for(let k in localStorage){
         delete localStorage[k];
     }

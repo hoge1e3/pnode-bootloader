@@ -1,6 +1,9 @@
 //@ts-check
+/**
+ * @typedef { import("./types").MultiSyncIDBStorage } MultiSyncIDBStorage
+ */
 import { getInstance } from "./pnode.js";
-import {deleteAllTablesInDatabase, mutablePromise} from "./util.js";
+import { mutablePromise} from "./util.js";
 import { assign } from "./global.js";
 let mountPromise=mutablePromise();
 const defaultFSTab=[
@@ -23,17 +26,20 @@ export async function mount(path="/fstab.json") {
     const useWS=location.href.match(/localhost/);
     const tab=readFstab(path);
     let wsMountPoint;
-    if (useWS) {
-        for (let {mountPoint,fsType,options} of tab) {
+    
+    for (let {mountPoint,fsType,options} of tab) {
+        const fs=await FS.mountAsync(mountPoint,fsType,options);
+        if (useWS) {
             if (fsType==="idb" && mountPoint.match(/^\/idb\b/) && !wsMountPoint) {
                 wsMountPoint=mountPoint;
                 console.log("wsMountPoint", wsMountPoint);
-                await deleteAllTablesInDatabase(options.dbName);
+                /** @ts-ignore */
+                const storage=fs.storage;
+                if (storage) {
+                    removeAllFromIDB(storage);
+                }
             }
         }
-    }
-    for (let {mountPoint,fsType,options} of tab) {
-        await FS.mountAsync(mountPoint,fsType,options);
     }
     if (wsMountPoint){ 
         const ws=await import("./ws-client.js");
@@ -41,4 +47,14 @@ export async function mount(path="/fstab.json") {
         await FS.getRootFS().commitPromise();
     }
     mountPromise.resolve();
+}
+/**
+ * @param storage {MultiSyncIDBStorage}
+ */
+export async function removeAllFromIDB(storage) {
+    for (let k of storage.keys()) {
+        //console.log(k); 
+        storage.removeItem(k);
+    }
+    await storage.waitForCommit();
 }

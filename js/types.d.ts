@@ -34,11 +34,14 @@ export type PNode={
 export type RootFS={
     hasUncommited():boolean;
     commitPromise():Promise<void>;
+    fstab(): FileSystem[];
+    hasUncommited():boolean;
+    commitPromise():Promise<void>;
 };
 export type TFS={
     get(path:string):SFile;
     getRootFS(): RootFS;
-    mountAsync(mountPoint:string,fsType:string,options?:any):Promise<void>;
+    mountAsync(mountPoint:string,fsType:string,options?:any):Promise<FileSystem>;
     zip:{
         unzip(zipfile:SFile, dest:SFile, options:any):Promise<void>;
         zip(src:SFile):Promise<void>;
@@ -87,3 +90,54 @@ export type PrefetchScriptOptions={
     module?: boolean;
     global?: string;
 };
+
+export type FSTypeName=string;
+export abstract class FileSystem {
+    constructor(rootFS:RootFS, mountPoint:string);
+    fstype():FSTypeName;
+    abstract hasUncommited():boolean;
+    abstract commitPromise():Promise<void>;
+    abstract isReadOnly(path:string):boolean;
+    resolveFS(path:string):FileSystem;
+    mountPoint: string;
+    inMYFS(path:string):boolean;
+    getRootFS():RootFS;
+    /*abstract getContent(path:string):Content;
+    abstract setContent(path:string, content:Content):void;
+    abstract appendContent(path:string, content:Content):void;
+    abstract lstat(path: string):Stats;*/
+    abstract setMtime(path: string, time: number):void;
+    getContentType(path:string):string;
+    abstract mkdir(path:string):void;
+    abstract touch(path:string):void;
+    abstract exists(path:string):boolean;
+    assertExist(path:string):void;
+    assertWriteable(path:string):void;
+    abstract opendir(path:string):string[];
+    //abstract opendirent(path:string):Dirent[];
+    //abstract direntOfMountPoint():Dirent;
+    copyFile(path:string, dst:string):void;
+    abstract rm(path:string):void;
+    link(path:string, to:string):void;
+    abstract isLink(path:string):string|undefined;
+    onAddObserver(path:string):void;
+    //static addFSType(name:string, factory:FSFactory|AsyncFSFactory, asyncOptions?:AsyncOptions):void;
+    inMyFS(path:string):boolean;
+}
+export declare class MultiSyncIDBStorage /*implements IStorage*/ {
+    private storage;
+    private channel;
+    channelName: string;
+    //changeEventTrait: ChangeEventTrait;
+    //addEventListener(type: "change", callback: (e: ChangeEvent) => void): void;
+    //removeEventListener(callback: (e: ChangeEvent) => void): void;
+    static create(dbName?: string, storeName?: string): Promise<MultiSyncIDBStorage>;
+    waitForCommit(): Promise<void>;
+    //constructor(storage: SyncIDBStorage);
+    getItem(key: string): string | null;
+    setItem(key: string, value: string): void;
+    removeItem(key: string): void;
+    itemExists(key: string): boolean;
+    keys(): IterableIterator<string>;
+    reload(key: string): Promise<string | null>;
+}

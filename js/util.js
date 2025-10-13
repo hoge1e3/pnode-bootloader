@@ -63,7 +63,7 @@ export function qsExists(...a) {
     return r;
 }
 
-/** @type (dbName:string)=>Promise<string> */
+/** @type (dbName:string)=>Promise<string> 
 export function deleteAllTablesInDatabase(dbName) {
   return new Promise((resolve, reject) => {
     // データベースを開く
@@ -72,6 +72,8 @@ export function deleteAllTablesInDatabase(dbName) {
         //@ts-ignore
       const db = event.target.result;
       // トランザクションを開始（すべてのオブジェクトストアにアクセスする）
+      console.log("db.objectStoreNames", db.objectStoreNames);
+      if (db.objectStoreNames.length===0) return resolve("object store was Empty.");
       const transaction = db.transaction(db.objectStoreNames, 'readwrite');
       transaction.oncomplete = () => {
         // トランザクションが成功した場合、データベースを閉じてPromiseを解決
@@ -98,7 +100,7 @@ export function deleteAllTablesInDatabase(dbName) {
       reject(`Failed to open the database "${dbName}": ${event.target.error}`);
     };
   });
-}
+}*/
 /**
  * 
  * @param {string} n 
