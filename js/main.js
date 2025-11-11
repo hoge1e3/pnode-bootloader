@@ -8,9 +8,12 @@ import {installPWA } from "./pwa.js";
 import {getValue, assignDefault, assign, pollute} from "./global.js";
 import { showModal, splash } from "./ui.js";
 const PNODE_VER=getValue("PNODE_VER");
-const PNODE_URL=location.href.match(/localhost.*pnode-bootkit/)?
-`${location.protocol}//${location.host}/petit-node/dist/index.js?abc`:
-`https://cdn.jsdelivr.net/npm/petit-node@${PNODE_VER}/dist/index.js`;
+const PNODE_URL=
+  location.href.match(/(localhost|rewrite).*pnode-bootkit/)?
+    location.href.replace(
+      /pnode-bootkit.*/,
+      `petit-node/dist/index.js?ab`):
+    `https://cdn.jsdelivr.net/npm/petit-node@${PNODE_VER}/dist/index.js`;
 onReady(onload);
 pollute({prefetchScript});
 assign({
