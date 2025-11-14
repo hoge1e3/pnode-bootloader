@@ -72,6 +72,10 @@ export function init(home) {
                             info: readFile(path),
                         }));
                     } else {
+                        if (path.match(/\b\.gsync\b/)) {
+                            alert("Suspicious file deletion! "+path);
+                            return;
+                        }
                         ws.send(JSON.stringify({
                             type: "delete",
                             path
