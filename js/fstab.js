@@ -34,10 +34,10 @@ export async function mount(path="/fstab.json") {
                 wsMountPoint=mountPoint;
                 console.log("wsMountPoint", wsMountPoint);
                 /** @ts-ignore */
-                const storage=fs.storage;
+                /*const storage=fs.storage;
                 if (storage) {
                     removeAllFromIDB(storage, mountPoint);
-                }
+                }*/
             }
         }
     }

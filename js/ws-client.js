@@ -60,7 +60,7 @@ export function init(home) {
     });
     function startWatch(){
         home.watch((type, file)=>{
-            const path=file.relPath(home);
+            const path=file.path();//relPath(home);
             //console.log(type,path, home.path(), file.path());
             if (file.isDir()) return;
             setTimeout(()=>{
