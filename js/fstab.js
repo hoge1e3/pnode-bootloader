@@ -20,15 +20,39 @@ export function readFstab(path="/fstab.json") {
     if (f.exists()) return f.obj();
     return defaultFSTab;
 }
+export async function reload(path="/fstab.json") {
+    await unmountExceptRoot();
+    // fstab.json does NOT contains root
+    await mount();
+}
+export async function unmountExceptRoot(){
+    const pNode=getInstance();
+    const fs=pNode.getCore().fs;
+    const mounted=fs.fstab().filter(f=>f.mountPoint!=="/").map(f=>f.mountPoint);
+    for (let m of mounted){
+        fs.unmount(m);
+    }
+}
+export async function wakeLazies(){
+    const pNode=getInstance();
+    const FS=pNode.getFS();
+    const fs=pNode.getCore().fs;
+    const mounted=fs.fstab()
+    for (let m of mounted) {
+        await fs.promises.readdir(m.mountPoint);
+    }
+}
 export async function mount(path="/fstab.json") {
     const pNode=getInstance();
     const FS=pNode.getFS();
+    const _fs=pNode.getCore().fs;
     const useWS=location.href.match(/localhost/);
     const tab=readFstab(path);
     let wsMountPoint;
     
     for (let {mountPoint,fsType,options} of tab) {
-        const fs=await FS.mountAsync(mountPoint,fsType,options);
+        // FS.mountAsync does not clear _fs.linkCache
+        const fs=await _fs.mountAsync(mountPoint,fsType,options);
         if (useWS) {
             if (fsType==="idb" && mountPoint.match(/^\/idb\b/) && !wsMountPoint) {
                 wsMountPoint=mountPoint;
@@ -42,8 +66,8 @@ export async function mount(path="/fstab.json") {
         }
     }
     if (wsMountPoint){ 
-        const ws=await import("./ws-client.js");
-        await ws.init(FS.get(wsMountPoint));
+        //const ws=await import("./ws-client.js");
+        //await ws.init(FS.get(wsMountPoint));
         await FS.getRootFS().commitPromise();
         const rootPkgJson=FS.get("/package.json");
         if (!rootPkgJson.exists() && process.env.INSTALL_DIR && FS.get(process.env.INSTALL_DIR).exists()) {

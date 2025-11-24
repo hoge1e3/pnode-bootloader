@@ -14,6 +14,19 @@ import { mutablePromise } from "./util.js";
  * @returns 
  */
 export function init(home) {
+    /**
+     * @param {string} path 
+     * @returns {SFile}
+     */
+    function resolve(path) {
+        path=path.replace(/\\/g,"/");
+        //console.log("resolving",path,path.startsWith("/"));
+        if (path.startsWith("/")) {
+            return home.clone(path);
+        } else {
+            return home.rel(path);
+        }
+    }
     const mp=mutablePromise();
     const ws = new WebSocket("ws://localhost:8080");
     //const files = {}; // path -> {mtime, content}
@@ -41,10 +54,9 @@ export function init(home) {
             for (let {path, info} of _data.files) {
                 writeFile(path, info, true);
             }
-            //Object.assign(files, _data.files);
             log("initialized: " + (_data.files).length + "Files. Taken "+(performance.now()-st)+"msec.");
-            startWatch();
-            mp.resolve();
+            /*startWatch();
+            mp.resolve();*/
         } else if (_data.type === "update") {
             const { path, info } = _data;
             const cur = readFile(path);
@@ -58,6 +70,8 @@ export function init(home) {
             log("deleted from server: " + path);
         }
     });
+    startWatch();
+    mp.resolve();
     function startWatch(){
         home.watch((type, file)=>{
             const path=file.path();//relPath(home);
@@ -94,7 +108,7 @@ export function init(home) {
      * @returns 
      */
     function readFile(path) {
-        const f=home.rel(path);
+        const f=resolve(path);
         return f.exists() ? {mtime: f.lastUpdate(), content:f.dataURL()} : null ;// files[path] || null;
     }
     /**
@@ -105,7 +119,7 @@ export function init(home) {
      * @returns 
      */
     function writeFile(path, info, nosend) {
-        const f=home.rel(path);
+        const f=resolve(path);
         //console.log("path-info",path, info);
         f.dataURL(info.content);
         //files[path] = info;
@@ -123,7 +137,7 @@ export function init(home) {
      * @returns {WSFileInfo|undefined}
      */
     function deleteFile(path, nosend) {
-        const f=home.rel(path);
+        const f=resolve(path);
         if (!f.exists()) return;
         f.rm();//    delete files[path];
         if (nosend) return;

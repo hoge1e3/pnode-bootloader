@@ -6,6 +6,7 @@ export type SFile={
     isDir():boolean;
     ls():string[];
     rel(path:string):SFile;
+    clone(abspath:string):SFile;
     path():string;
     relPath(base:SFile):string;
     lastUpdate():number;
@@ -22,7 +23,12 @@ export type WSFileInfo={
 export type PNode={
     boot():Promise<void>;
     version:string;
-    getFS():TFS
+    getFS():TFS;
+    getCore():{
+        fs: {
+            mountAsync(mountPoint:string,fsType:string,options?:any):Promise<FileSystem>;
+        }
+    }
     importModule(f:SFile):any;
     file(path:string):SFile;
     resolveEntry(wantModuleType:"ES"|"CJS",f:SFile):Entry;
@@ -38,6 +44,7 @@ export type RootFS={
     fstab(): FileSystem[];
     hasUncommited():boolean;
     commitPromise():Promise<void>;
+    unmount(mountedPoint:string):void;
 };
 export type TFS={
     get(path:string):SFile;
