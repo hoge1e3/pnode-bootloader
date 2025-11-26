@@ -20,16 +20,24 @@ export type WSFileInfo={
     content:string;
     mtime:number;
 };
+export type NodeLikeFs=typeof import("node:fs") & {
+    mount(mountPoint:string,fsType:string,options?:any):Promise<FileSystem>;
+    unmount(mountPoint:string):Promise<FileSystem>;
+    fstab():FileSystem[];
+    commitPromise():Promise<void>;
+    promises:{
+        readdir(path:string):Promise<string[]>
+    }
+};
 export type PNode={
     boot():Promise<void>;
     version:string;
     getFS():TFS;
+    getNodeLikeFs():NodeLikeFs;
     getCore():{
-        fs: {
-            mountAsync(mountPoint:string,fsType:string,options?:any):Promise<FileSystem>;
-        }
+        fs: NodeLikeFs
     }
-    importModule(f:SFile):any;
+    importModule(f:SFile|string):any;
     file(path:string):SFile;
     resolveEntry(wantModuleType:"ES"|"CJS",f:SFile):Entry;
     ESModuleCompiler:{
@@ -131,6 +139,7 @@ export abstract class FileSystem {
     onAddObserver(path:string):void;
     //static addFSType(name:string, factory:FSFactory|AsyncFSFactory, asyncOptions?:AsyncOptions):void;
     inMyFS(path:string):boolean;
+    storage?: MultiSyncIDBStorage;
 }
 export declare class MultiSyncIDBStorage /*implements IStorage*/ {
     private storage;

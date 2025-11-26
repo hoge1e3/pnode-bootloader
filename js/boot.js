@@ -12,13 +12,13 @@
 import { getValue } from "./global.js";
 import { getInstance } from "./pnode.js";
 import { qsExists, timeout,can, getEnv } from "./util.js";
-import { getMountPromise,readFstab, removeAllFromIDB } from "./fstab.js";
+import { getMountPromise,readFstab, } from "./fstab.js";
 
 let rmbtn=()=>{};
 /**@type ShowModal */
-let showModal=(show)=>document.body;
+export let showModal=(show)=>document.body;
 /**@type Splash */
-let splash=async (mesg, dom)=>{};
+export let splash=async (mesg, dom)=>{};
 /**@type (dc:WireUIDC)=>void*/
 export function wireUI(dc){
   rmbtn=dc.rmbtn;
@@ -108,42 +108,4 @@ export function insertBootDisk() {
         const mod=await pNode.importModule(fixrun(run));
         if(can(mod,"install")) mod.install();
     });
-}
-export async function resetall(){
-    if(prompt("type 'really' to clear all data")!=="really")return;
-    const sp=showModal(".splash");
-    await splash("deleting...",sp);
-    const tab=readFstab();
-    const pNode=getInstance();
-    const FS=pNode.getFS();
-    const rootFS=FS.getRootFS();
-    for (let fs of rootFS.fstab()) {
-        if(fs.fstype()==="IndexedDB") {
-            /** @ts-ignore */
-            await removeAllFromIDB(fs.storage, fs.mountPoint);
-        }   
-    }
-    /*for (let {mountPoint,fsType,options} of tab) {
-      if(fsType==="idb"){
-        await deleteAllTablesInDatabase(options.dbName);
-      }
-    }*/
-    for(let k in localStorage){
-        delete localStorage[k];
-    }
-    localStorage["/"]="{}";
-    const r=FS.getRootFS();
-    while(r.hasUncommited()) {
-        await timeout(100);
-    }
-    showModal();
-    location.reload();
-}
-export async function fullBackup(){
-    const pNode=getInstance();
-    const FS=pNode.getFS();
-    const sp=showModal(".splash");
-    await splash("zipping...",sp);
-    await FS.zip.zip(FS.get("/"));
-    showModal();
 }

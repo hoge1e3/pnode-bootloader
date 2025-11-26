@@ -11,10 +11,11 @@ import { /*prefetchAuto ,*/ prefetchModule, doQuick } from "./prefetcher.js";
 import { getInstance } from "./pnode.js";
 
 import {networkBoot,insertBootDisk,
-resetall,fullBackup,fixrun,wireUI} from "./boot.js";
+fixrun,wireUI} from "./boot.js";
 import {getMountPromise} from "./fstab.js";
 import { getValue } from "./global.js";
 import { btn, showModal, splash, rmbtn as rmbtnWithoutQuick } from "./ui.js";
+import { fullBackup, factoryReset } from "./backup.js";
 
 export function rmbtn(){
     rmbtnWithoutQuick();
@@ -36,7 +37,10 @@ export function showMenus(rootPkgJson){
         btn(["💿","Install/Rescue"],()=>networkBoot(su));
     }
     btn(["💾","Insert Boot Disk"],()=>insertBootDisk());
-    btn(["💣","Factory Reset"],()=>resetall());
+    btn(["💣","Factory Reset"],()=>{
+        if(prompt("type 'really' to clear all data")!=="really")return;
+        factoryReset();
+    });
     btn(["📦","Full backup"],()=>fullBackup());
     btn(["💻","Console"],()=>showConsole());
     //console.log("rp",rp.exists());
