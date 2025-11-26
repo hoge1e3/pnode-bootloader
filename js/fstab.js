@@ -36,7 +36,7 @@ export async function unmountExceptRoot(){
 export async function wakeLazies(){
     const pNode=getInstance();
     const fs=pNode.getNodeLikeFs();
-    const mounted=fs.fstab()
+    const mounted=fs.fstab();
     for (let m of mounted) {
         await fs.promises.readdir(m.mountPoint);
     }

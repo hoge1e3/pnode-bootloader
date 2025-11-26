@@ -11,6 +11,7 @@ export async function factoryReset(){
     await splash("Factory reset...",sp);
     const pNode=getInstance();
     const _fs=pNode.getNodeLikeFs();
+    await wakeLazies();  
     for (let fs of _fs.fstab()) {
         if(fs.fstype()==="IndexedDB" && fs.storage) {
             await removeAllFromIDB(fs.storage, fs.mountPoint);
@@ -22,12 +23,13 @@ export async function factoryReset(){
     localStorage["/"]="{}";
     await _fs.commitPromise();
     showModal();
-    location.reload();
 }
 export async function fullBackup(){
     const pNode=getInstance();
     const FS=pNode.getFS();
     const sp=showModal(".splash");
+    await splash("Activate all fs...",sp);
+    await wakeLazies();
     await splash("zipping...",sp);
     await FS.zip.zip(FS.get("/"));
     showModal();
@@ -59,13 +61,18 @@ export async function fullRestore(arrayBuf){
     const jszip = new JSZip();
     await jszip.loadAsync(arrayBuf);
     const _fs=pNode.getNodeLikeFs();
-    const zipEntry = jszip.files["fstab.json"];
+    const _path=await pNode.importModule("path");
+    const fstabName="fstab.json";
+    const fstabPath="/"+fstabName;
+    
+    const zipEntry = jszip.files[fstabName];
     if (zipEntry) {
         const fstab_str = await zipEntry.async("string");
-        if (_fs.readFileSync("/fstab.json",{encoding:"utf8"})!==fstab_str) {
+        if (!_fs.existsSync(fstabPath) ||
+            _fs.readFileSync(fstabPath,{encoding:"utf8"})!==fstab_str) {
             splash("Unmounting existing fs",sp);
             await unmountExceptRoot();
-            _fs.writeFileSync("/fstab.json",fstab_str);
+            _fs.writeFileSync(fstabPath, fstab_str);
             splash("Mounting new fs", sp);
             await mount();
             await factoryReset();
@@ -77,8 +84,13 @@ export async function fullRestore(arrayBuf){
     splash("Unzipping files ", sp);
     for (let key of Object.keys(jszip.files)) {
         const zipEntry = jszip.files[key];
-        const buf = await zipEntry.async("arraybuffer");
-        _fs.writeFileSync("/"+zipEntry.name,buf);
+        const filePath="/"+key;
+        console.log("Unzip", filePath);
+        await _fs.promises.mkdir(_path.dirname(filePath), {recursive:true} );
+        if (!zipEntry.dir) {
+            const buf = await zipEntry.async("arraybuffer");
+            await _fs.promises.writeFile(filePath, buf);
+        }
     }
     showModal();
 }

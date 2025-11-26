@@ -14,8 +14,9 @@ import {networkBoot,insertBootDisk,
 fixrun,wireUI} from "./boot.js";
 import {getMountPromise} from "./fstab.js";
 import { getValue } from "./global.js";
-import { btn, showModal, splash, rmbtn as rmbtnWithoutQuick } from "./ui.js";
-import { fullBackup, factoryReset } from "./backup.js";
+import { btn, showModal, splash, rmbtn as rmbtnWithoutQuick, uploadFile } from "./ui.js";
+import { fullBackup, factoryReset, fullRestore } from "./backup.js";
+import { blob2arrayBuffer } from "./util.js";
 
 export function rmbtn(){
     rmbtnWithoutQuick();
@@ -37,11 +38,18 @@ export function showMenus(rootPkgJson){
         btn(["💿","Install/Rescue"],()=>networkBoot(su));
     }
     btn(["💾","Insert Boot Disk"],()=>insertBootDisk());
-    btn(["💣","Factory Reset"],()=>{
+    btn(["💣","Factory Reset"],async ()=>{
         if(prompt("type 'really' to clear all data")!=="really")return;
-        factoryReset();
+        await factoryReset();
+        if (confirm("Factory reset complete. reload?")) location.reload();
     });
     btn(["📦","Full backup"],()=>fullBackup());
+    btn(["📦","Full restore"],async ()=>{
+        const blob=await uploadFile();
+        const arrayBuffer=await blob2arrayBuffer(blob);
+        await fullRestore(arrayBuffer);
+        if (confirm("Full restore complete. reload?")) location.reload();
+    });
     btn(["💻","Console"],()=>showConsole());
     //console.log("rp",rp.exists());
 }

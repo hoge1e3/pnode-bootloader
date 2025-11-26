@@ -1,5 +1,5 @@
 //@ts-check
-import { qsExists, timeout } from "./util.js";
+import { mutablePromise, qsExists, timeout } from "./util.js";
 /** 
  * @typedef { import("./types").SFile } SFile
  * @typedef { import("./types").Menus } Menus
@@ -18,6 +18,7 @@ export function showModal(s) {
     modal.addEventListener("click",(e)=>{
         if (e.target===modal) {
             showModal(false);
+            modal.dispatchEvent(new CustomEvent("close"));
         }
     });
     modalInited=true;
@@ -82,4 +83,25 @@ export function rmbtn(){
 export async function splash(mesg,sp){
   sp.textContent=mesg;
   await timeout(1);    
+}
+/**
+ * 
+ * @param {{onShow?:(evt:{dom:HTMLElement})=>void}} opt 
+ * @returns {Promise<Blob>}
+ */
+export async function uploadFile(opt={}){
+  const cas=showModal(".upload");
+  if (opt.onShow) {
+    opt.onShow({dom:cas});
+  }
+  const promise=mutablePromise();
+  cas.addEventListener("close",()=>promise.reject(new Error("closed")),{once:true});
+  const file=qsExists(cas, ".file");
+  file.addEventListener("input",async function () {
+    //@ts-ignore
+    const file=this.files && this.files[0];
+    showModal();
+    promise.resolve(file);
+  });
+  return promise;
 }

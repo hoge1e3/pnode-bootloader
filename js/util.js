@@ -120,3 +120,16 @@ export function directorify(p) {
   if (!p.endsWith("/")) p+="/";
   return p;
 }
+/**
+ * 
+ * @param {Blob} blob
+ * @returns {Promise<ArrayBuffer>} 
+ */
+export function blob2arrayBuffer(blob){
+  const r=mutablePromise();
+  const f=new FileReader();
+  f.onload=()=>r.resolve(f.result);
+  f.onerror=()=>f.error&&r.reject(f.error);
+  f.readAsArrayBuffer(blob);
+  return r;
+}
