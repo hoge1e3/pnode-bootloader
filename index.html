@@ -20,8 +20,8 @@ function err (event) {
         console.error(e);
         alerts(((e.message||"")+(e.stack||""))||e.toString());
     } if (event.reason) {
-      console.log(events);
-      alerts(events.reason);
+      console.log(event);
+      alerts(event.reason);
     } else {
         console.error(event);
         alerts(event.message||event.toString());

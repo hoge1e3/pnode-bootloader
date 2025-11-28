@@ -26,12 +26,18 @@ wireUI({rmbtn,showModal,splash});
 /** @type (rp:SFile)=>void */
 export function showMenus(rootPkgJson){
     const pNode=getInstance();
-    const FS=pNode.getFS();
+    //const FS=pNode.getFS();
     
     
     if(rootPkgJson.exists()){
-        showMainmenus(rootPkgJson);
-        //showSubmenus(rp);
+        // ensure factory reset, evan if failed by file system inconsistency. 
+        // (for example, /package.json entry is in / but not in localStorage)
+        try{
+            showMainmenus(rootPkgJson);
+        }catch(e) {
+            console.error(e);
+            alert(e);
+        }
     }
     const su=process.env.SETUP_URL;
     if (su) {
