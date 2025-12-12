@@ -57,7 +57,7 @@ export async function fullRestore(arrayBuf){
     
     const sp=showModal(".splash");
     const pNode=getInstance();
-    const JSZip=await pNode.importModule("jszip");
+    const JSZip=await pNode.importModule("pnode:jszip");
     const jszip = new JSZip();
     await jszip.loadAsync(arrayBuf);
     const _fs=pNode.getNodeLikeFs();
@@ -92,5 +92,7 @@ export async function fullRestore(arrayBuf){
             await _fs.promises.writeFile(filePath, buf);
         }
     }
+    splash("Waiting for commit...",sp);
+    await _fs.getRootFS().commitPromise();
     showModal();
 }

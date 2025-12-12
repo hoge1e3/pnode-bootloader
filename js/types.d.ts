@@ -27,7 +27,8 @@ export type NodeLikeFs=typeof import("node:fs") & {
     commitPromise():Promise<void>;
     promises:{
         readdir(path:string):Promise<string[]>
-    }
+    };
+    getRootFS():RootFS,
 };
 export type PNode={
     boot():Promise<void>;
