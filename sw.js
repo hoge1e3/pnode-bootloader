@@ -1,9 +1,11 @@
 const NAME = 'acepad-os';
-const VERSION = '025';
+const VERSION = '030';
 const CACHE_NAME = NAME + VERSION;
+const blobStore = new Map();
 const urlsToCache = [
     //"./test.js",
 ];
+const blobListURL="blobList";
 // Service Worker へファイルをインストール
 let cache;
 async function installEvent(event){
@@ -20,8 +22,20 @@ self.addEventListener("message",(event)=>{
     //const data=event.data;
     // data={url: body: headers: }
     //fs[data.url]=data;
-    if (event.source) {
-        event.source.postMessage({ CACHE_NAME });
+    const { type, path, blob } = event.data || {};
+    if (type === "REGISTER_BLOB") {
+        const url=self.registration.scope+path;
+        if (blob) {
+            blobStore.set(url, blob);
+            console.log("Blob registered:", url);
+        } else {
+            blobStore.delete(url);
+            console.log("Blob deleted:", url);
+        }
+    } else {
+        if (event.source) {
+            event.source.postMessage({ CACHE_NAME });
+        }
     }
 });
 function useCacheOnlyIfOffline({url}) {
@@ -46,6 +60,24 @@ self.addEventListener('fetch', (event)=>{
             return await fetch(request);
         }
         const {url}=request;
+        //const urlObj = new URL(url);
+        //const path = urlObj.pathname;
+        if (blobStore.has(url)) {
+            const blob = blobStore.get(url);
+            return new Response(blob, {
+                    headers: {
+                        "Content-Type": blob.type || "application/octet-stream",
+                        "Content-Length": blob.size
+                    }});
+        }
+        if (url===self.registration.scope+blobListURL) {
+            const blob=new Blob([JSON.stringify([...blobStore.keys()])],{"type":"text/json"});
+            return new Response(blob, {
+                    headers: {
+                        "Content-Type": blob.type || "text/json",
+                        "Content-Length": blob.size
+                    }});
+        }
         if (!cache) {
             try {
                 cache=await caches.open(CACHE_NAME);
