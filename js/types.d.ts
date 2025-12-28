@@ -20,21 +20,23 @@ export type WSFileInfo={
     content:string;
     mtime:number;
 };
-export type NodeLikeFs=typeof import("node:fs") & {
+export type DeviceManager=typeof import("node:fs") & {
     mount(mountPoint:string,fsType:string,options?:any):Promise<FileSystem>;
     unmount(mountPoint:string):Promise<FileSystem>;
-    fstab():FileSystem[];
+    df():FileSystem[];
     commitPromise():Promise<void>;
     promises:{
         readdir(path:string):Promise<string[]>
     };
-    getRootFS():RootFS,
+    //getRootFS():RootFS,
 };
+export type NodeLikeFs=typeof import("node:fs");
 export type PNode={
     boot():Promise<void>;
     version:string;
     getFS():TFS;
     getNodeLikeFs():NodeLikeFs;
+    getDeviceManager():DeviceManager;
     getCore():{
         fs: NodeLikeFs
     }
