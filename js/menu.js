@@ -50,7 +50,7 @@ export function showMenus(rootPkgJson){
         if (confirm("Factory reset complete. reload?")) location.reload();
     });
     btn(["📦","Full backup"],()=>fullBackup());
-    btn(["📦","Full restore"],async ()=>{
+    btn(["📤","Full restore"],async ()=>{
         const blob=await uploadFile();
         const arrayBuffer=await blob2arrayBuffer(blob);
         await fullRestore(arrayBuffer);
