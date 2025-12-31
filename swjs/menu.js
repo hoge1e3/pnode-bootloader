@@ -10,7 +10,7 @@
 import {insertBootDisk,readPackagejson,wireUI} from "./boot.js";
 import { getValue } from "./global.js";
 import { btn, showModal, splash, rmbtn as rmbtnWithoutQuick, uploadFile } from "./ui.js";
-import { blob2arrayBuffer, getEnv } from "./util.js";
+import { blob2arrayBuffer, can, getEnv } from "./util.js";
 
 export function rmbtn(){
     rmbtnWithoutQuick();
@@ -25,7 +25,7 @@ export async function showMenus(){
     if (su) {
         btn(["💿","Install/Rescue"],()=>networkBoot(su));
     }*/
-    btn(["💾","Add Boot Disk"],()=>insertBootDisk());
+    btn(["💾","Add Cartridge"],()=>insertBootDisk());
     /*btn(["💣","Factory Reset"],async ()=>{
         if(prompt("type 'really' to clear all data")!=="really")return;
         await factoryReset();
@@ -88,6 +88,10 @@ export async function runMenu(k,v){
         if(v.call){
           const [n,...a]=v.call;
           mod[n](...a);
+        }else {
+            if (can(mod,"onInitCartridge")){
+                await mod.onInitCartridge(v);
+            }
         }
     } finally {
         showModal(false);
