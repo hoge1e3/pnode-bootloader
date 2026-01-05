@@ -98,6 +98,24 @@ addMessageHandler("serve_blob",async(event)=>{
       }}));
   event.source.postMessage({type:"response", for:"serve_blob", url});
 });
+addMessageHandler("unserve_blob",async(event)=>{
+  const { url, } = event.data || {};
+  const cache=await getCache();
+  // delete cache entry of url
+  await cache.delete(url);
+  event.source.postMessage({type:"response", for:"unserve_blob", url});
+});
+addMessageHandler("list_blob", async (event) => {
+  const cache = await getCache();
+  // post list of urls in cache
+  const requests = await cache.keys();
+  const urls = requests.map(req => req.url);
+  event.source.postMessage({
+    type: "response",
+    for: "list_blob",
+    urls
+  });
+});
 addMessageHandler("CACHE_NAME",(event)=>{
     event.source.postMessage({ CACHE_NAME });
 });
