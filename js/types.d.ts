@@ -28,6 +28,7 @@ export type DeviceManager=typeof import("node:fs") & {
     promises:{
         readdir(path:string):Promise<string[]>
     };
+    readFstab(path:string, def:object):any;
     //getRootFS():RootFS,
 };
 export type NodeLikeFs=typeof import("node:fs");
