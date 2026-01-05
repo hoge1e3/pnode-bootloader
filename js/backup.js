@@ -10,9 +10,9 @@ export async function factoryReset(){
     const sp=showModal(".splash");
     await splash("Factory reset...",sp);
     const pNode=getInstance();
-    const _fs=pNode.getNodeLikeFs();
+    const dev=pNode.getDeviceManager();
     await wakeLazies();  
-    for (let fs of _fs.fstab()) {
+    for (let fs of dev.df()) {
         if(fs.fstype()==="IndexedDB" && fs.storage) {
             await removeAllFromIDB(fs.storage, fs.mountPoint);
         }   
@@ -21,7 +21,7 @@ export async function factoryReset(){
         delete localStorage[k];
     }
     localStorage["/"]="{}";
-    await _fs.commitPromise();
+    await dev.commitPromise();
     showModal();
 }
 export async function fullBackup(){
@@ -61,6 +61,7 @@ export async function fullRestore(arrayBuf){
     const jszip = new JSZip();
     await jszip.loadAsync(arrayBuf);
     const _fs=pNode.getNodeLikeFs();
+    const dev=pNode.getDeviceManager();
     const _path=await pNode.importModule("path");
     const fstabName="fstab.json";
     const fstabPath="/"+fstabName;
@@ -93,6 +94,6 @@ export async function fullRestore(arrayBuf){
         }
     }
     splash("Waiting for commit...",sp);
-    await _fs.getRootFS().commitPromise();
+    await dev.commitPromise();
     showModal();
 }

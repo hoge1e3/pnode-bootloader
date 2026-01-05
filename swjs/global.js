@@ -1,33 +1,33 @@
 //@ts-check
 import { isPlainObject } from "./util.js";
 
-/** @type any */
+/** @type {any} */
 const g=globalThis;
 const NAME="pNodeBootLoader";
 /** @type any */
-const pNodeBootLoader=g[NAME]||{};
-g[NAME]=pNodeBootLoader;
+const serviceWorkerKit=g[NAME]||{};
+g[NAME]=serviceWorkerKit;
 export function getGlobal() {
-    return pNodeBootLoader;
+    return serviceWorkerKit;
 }
 /**
  * @param {string} k 
  * @returns any
  */
 export function getValue(k) {
-    return pNodeBootLoader[k] || g[k];
+    return serviceWorkerKit[k] || g[k];
 }
 /**
  * @param {object} o 
  */
 export function pollute(o) {
-    assign(o, pNodeBootLoader);
+    assign(o, serviceWorkerKit);
     assign(o, globalThis);
 }
 /**
  * @param {any} o 
  */
-export function assign(o, dst=pNodeBootLoader) {
+export function assign(o, dst=serviceWorkerKit) {
     for (let k in o) {
         if (isPlainObject(o[k]) && isPlainObject(dst[k])) {
             assign(o[k], dst[k]);
@@ -39,7 +39,7 @@ export function assign(o, dst=pNodeBootLoader) {
 /**
  * @param {any} o 
  */
-export function assignDefault(o, dst=pNodeBootLoader) {
+export function assignDefault(o, dst=serviceWorkerKit) {
     for (let k in o) {
         if (isPlainObject(o[k]) && isPlainObject(dst[k])) {
             assignDefault(o[k], dst[k]);

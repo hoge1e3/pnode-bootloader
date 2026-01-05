@@ -2,7 +2,7 @@
 import {assign, pollute} from "./global.js";
 export async function installPWA(swurl="./sw.js"){
     try {
-        const registration=await navigator.serviceWorker.register(swurl);
+        const registration=await navigator.serviceWorker.register(swurl, {type: 'module'});
         console.log('ServiceWorker registration successful with scope: ', registration.scope);
         console.log("registration",registration);
         const sw=registration.active;
@@ -13,8 +13,8 @@ export async function installPWA(swurl="./sw.js"){
         navigator.serviceWorker.addEventListener("message",({data})=>{
             console.log("CACHE_NAME",data.CACHE_NAME);
             pollute({__CACHE_NAME__:data.CACHE_NAME});
-        });
-        sw.postMessage("");
+        },{once:true});
+        sw.postMessage({type:"CACHE_NAME"});
     }catch(err) {
         console.error(err);
         console.log('ServiceWorker registration failed: ', err);
