@@ -47,6 +47,8 @@ export async function unzipBlob(blob, dest) {
     await zip.setBlob(blob);
     dest.mkdir();
     await FS.zip.unzip(zip,dest,{v:1});
+    status("Waiting for commit...");
+    await pNode.getDeviceManager().commitPromise();
 }
 /**@type (run:SFile)=>SFile */
 export function fixrun(run){
