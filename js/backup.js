@@ -13,7 +13,7 @@ export async function factoryReset(){
     const dev=pNode.getDeviceManager();
     await wakeLazies();  
     for (let fs of dev.df()) {
-        if(fs.fstype()==="IndexedDB" && fs.storage) {
+        if(fs.fstype()==="idb" && fs.storage) {
             await removeAllFromIDB(fs.storage, fs.mountPoint);
         }   
     }
